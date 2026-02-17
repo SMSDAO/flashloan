@@ -11,7 +11,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "build": "echo 'Backend build complete'",
-    "test": "echo 'Backend tests passed'",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
@@ -28,6 +29,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.0",
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0"
   }
 }

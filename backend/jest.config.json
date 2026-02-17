@@ -1,0 +1,16 @@
+{
+  "testEnvironment": "node",
+  "transform": {},
+  "testMatch": [
+    "**/tests/**/*.test.js"
+  ],
+  "moduleFileExtensions": [
+    "js",
+    "json"
+  ],
+  "collectCoverageFrom": [
+    "**/*.js",
+    "!**/node_modules/**",
+    "!**/tests/**"
+  ]
+}

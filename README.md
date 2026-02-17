@@ -103,6 +103,32 @@ flashloan/
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment guide.
 
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# All tests
+npm test
+
+# Backend only
+cd backend && npm test
+
+# Frontend only
+cd frontend && npm test
+
+# Watch mode
+npm run test:watch
+```
+
+### Test Coverage
+
+```bash
+npm test -- --coverage
+```
+
+See [docs/TESTING.md](./docs/TESTING.md) for comprehensive testing guide.
+
 ## 📋 Configuration
 
 ### Environment Variables
