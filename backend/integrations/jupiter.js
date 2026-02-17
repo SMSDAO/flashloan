@@ -72,19 +72,21 @@ export async function findJupiterArbitrage(tokens, amount) {
       try {
         // Get route A -> B
         const routeAB = await getJupiterRoute(tokenA, tokenB, amount);
-        // Get route B -> A
-        const routeBA = await getJupiterRoute(tokenB, tokenA, parseInt(routeAB.outAmount));
+        // Get route B -> A - use BigInt to maintain precision
+        const outAmountBigInt = BigInt(routeAB.outAmount);
+        const routeBA = await getJupiterRoute(tokenB, tokenA, outAmountBigInt.toString());
         
-        const finalAmount = parseInt(routeBA.outAmount);
-        const profit = finalAmount - amount;
-        const profitPercent = (profit / amount) * 100;
+        const finalAmountBigInt = BigInt(routeBA.outAmount);
+        const initialAmountBigInt = BigInt(amount);
+        const profit = Number(finalAmountBigInt - initialAmountBigInt);
+        const profitPercent = (Number(finalAmountBigInt - initialAmountBigInt) / Number(initialAmountBigInt)) * 100;
         
         if (profit > 0) {
           opportunities.push({
             tokenA,
             tokenB,
             initialAmount: amount,
-            finalAmount,
+            finalAmount: Number(finalAmountBigInt),
             profit,
             profitPercent: profitPercent.toFixed(2),
             routes: [routeAB, routeBA],

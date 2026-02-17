@@ -67,8 +67,9 @@ class NetworkOptimizer {
       const agent = this.createProxyAgent(proxyStr);
       if (!agent) return { healthy: false, latency: 0 };
 
-      // Test connection through proxy
-      const response = await fetch('https://api.mainnet-beta.solana.com', {
+      // Test connection through proxy using config RPC
+      const testUrl = process.env.PROXY_TEST_URL || 'https://api.mainnet-beta.solana.com';
+      const response = await fetch(testUrl, {
         agent,
         signal: AbortSignal.timeout(NETWORK_CONFIG.connectionTimeout),
       });

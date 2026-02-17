@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
 import { AnchorProvider, Program, web3 } from '@coral-xyz/anchor';
-import { getActiveRPC, PROGRAM_IDS, FEE_CONFIG } from './config.js';
+import { getActiveRPC, PROGRAM_IDS, FEE_CONFIG, RPC_CONFIG } from './config.js';
 
 // Initialize Solana connection
 let connection = null;
@@ -125,9 +125,8 @@ export async function startPoolListener(pools, callback) {
 
 // Jito MEV bundle submission
 export async function submitJitoBundle(transactions, tipAmount) {
-  const { jito } = await import('./config.js').then(m => m.RPC_CONFIG);
   const network = process.env.SOLANA_NETWORK || 'devnet';
-  const endpoint = jito[network] || jito.devnet;
+  const endpoint = RPC_CONFIG.jito[network] || RPC_CONFIG.jito.devnet;
   
   console.log('Submitting Jito bundle:', {
     txCount: transactions.length,

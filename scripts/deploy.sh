@@ -35,7 +35,12 @@ echo "✅ Dependencies installed"
 # Build Solana program (if Cargo is available)
 if command -v cargo &> /dev/null; then
     echo "🔨 Building Solana program..."
-    cargo build-bpf --manifest-path=programs/flashloan-arbitrage/Cargo.toml 2>/dev/null || echo "⚠️  Solana BPF build skipped (requires solana-cli)"
+    if cargo build-bpf --manifest-path=programs/flashloan-arbitrage/Cargo.toml; then
+        echo "✅ Solana program built successfully"
+    else
+        echo "⚠️  Solana BPF build failed. Check logs for details."
+        echo "   This is optional for backend deployment."
+    fi
 else
     echo "⚠️  Rust/Cargo not found. Skipping program build."
 fi

@@ -151,7 +151,12 @@ export default function Dashboard({ socket }) {
                 className="neo-input" 
                 type="number" 
                 value={amount} 
-                onChange={e => setAmount(Number(e.target.value))} 
+                onChange={e => {
+                  const val = parseFloat(e.target.value);
+                  setAmount(isNaN(val) || val < 0 ? 0 : val);
+                }}
+                min="0"
+                step="0.01"
                 placeholder="Amount"
               />
             </div>
@@ -209,12 +214,12 @@ export default function Dashboard({ socket }) {
               </div>
               <div className="detail-row">
                 <span>Score:</span>
-                <span>{result.score?.toFixed(2)}</span>
+                <span>{result.score?.toFixed(2) || '0.00'}</span>
               </div>
               <div className="detail-row">
                 <span>Profit:</span>
                 <span className="glow-text">
-                  +${result.profit?.toFixed(4)}
+                  +${result.profit?.toFixed(4) || '0.0000'}
                 </span>
               </div>
             </div>
@@ -233,7 +238,7 @@ export default function Dashboard({ socket }) {
                     <span>{new Date(exec.timestamp).toLocaleTimeString()}</span>
                   </div>
                   <div className="exec-details">
-                    Amount: {exec.amount} | Profit: +${exec.profit?.toFixed(4)}
+                    Amount: {exec.amount} | Profit: +${exec.profit?.toFixed(4) || '0.0000'}
                   </div>
                 </div>
               ))}
