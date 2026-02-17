@@ -62,9 +62,8 @@ flashloan/
 ### Prerequisites
 
 - Node.js 24+
-- Rust 1.70+
-- Solana CLI (for program deployment)
-- Python 3.10+ (for bots)
+- Rust 1.70+ (optional, for Solana program development)
+- Git
 
 ### Installation
 
@@ -74,23 +73,18 @@ flashloan/
    cd flashloan
    ```
 
-2. **Install dependencies**
+2. **Auto-configure environment** 🎯 NEW!
+   ```bash
+   ./scripts/setup-env.sh
+   ```
+   This automatically creates `.env` with sensible defaults and generates a secure encryption key.
+
+3. **Install dependencies**
    ```bash
    npm run setup
    ```
 
-3. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. **Build Solana program**
-   ```bash
-   npm run build:program
-   ```
-
-5. **Start development servers**
+4. **Start development servers**
    ```bash
    npm run dev
    ```
@@ -98,6 +92,16 @@ flashloan/
    This starts:
    - Backend on http://localhost:4000
    - Frontend on http://localhost:3000
+
+### Quick Deploy to Vercel ☁️
+
+1. **Push to GitHub** (if not already done)
+2. **Go to [Vercel](https://vercel.com)**
+3. **Import your repository**
+4. **Add environment variable**: `NEXT_PUBLIC_BACKEND_URL`
+5. **Click Deploy** ✨
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment guide.
 
 ## 📋 Configuration
 

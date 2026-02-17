@@ -25,8 +25,11 @@
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm start",
     "setup": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "setup:env": "./scripts/setup-env.sh",
+    "setup:all": "npm run setup:env && npm run setup",
     "deploy:devnet": "solana program deploy target/deploy/flashloan_arbitrage.so --url devnet",
-    "deploy:mainnet": "solana program deploy target/deploy/flashloan_arbitrage.so --url mainnet-beta"
+    "deploy:mainnet": "solana program deploy target/deploy/flashloan_arbitrage.so --url mainnet-beta",
+    "deploy:vercel": "vercel --prod"
   },
   "workspaces": [
     "backend",

@@ -9,6 +9,7 @@ pnpm-lock.yaml
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # Build outputs
 dist/
@@ -73,3 +74,6 @@ backend/dist/
 *.pem
 *.key
 *.cert
+
+# Vercel
+.vercel

@@ -1,9 +1,45 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "src/index.tsx", "use": "@vercel/node" }
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/.next",
+  "framework": "nextjs",
+  "installCommand": "npm install --prefix frontend",
+  "env": {
+    "NEXT_PUBLIC_BACKEND_URL": "@backend_url",
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_BACKEND_URL": "@backend_url"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://your-backend-domain.com/api/:path*"
+    }
   ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/src/index.tsx" }
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        }
+      ]
+    }
   ]
 }

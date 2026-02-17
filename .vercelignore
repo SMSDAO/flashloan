@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+target/
+dist/
+backend/
+
+# Desktop app
+desktop-admin/
+
+# Python bots
+bot/
+*.py
+__pycache__/
+
+# Rust
+programs/
+*.rs
+Cargo.toml
+Cargo.lock
+
+# Scripts
+scripts/
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation build artifacts
+docs/
+
+# Only deploy frontend
+!frontend/
