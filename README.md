@@ -18,7 +18,7 @@ Production-grade 2026 Solana flashloan arbitrage platform with multi-provider su
 - **Admin Desktop App**: Tauri-based Windows 11 application (admin.exe)
 
 ### Frontend (Neo Glow UI)
-- Next.js 14+ with glassmorphism design
+- Next.js 15+ with glassmorphism design
 - Real-time transaction visualizers
 - Profitability dashboard
 - Bot management interface

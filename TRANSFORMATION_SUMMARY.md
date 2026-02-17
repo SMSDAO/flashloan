@@ -152,7 +152,7 @@ Successfully transformed the flashloan repository from a basic DeFi concept into
 | Component | Technology | Version |
 |-----------|-----------|---------|
 | Node.js | JavaScript Runtime | 24+ |
-| Next.js | React Framework | 14.2+ |
+| Next.js | React Framework | 15.0.8+ |
 | React | UI Library | 18.3 |
 | Anchor | Solana Framework | 0.30.1 |
 | Rust | Systems Language | 1.93+ |
