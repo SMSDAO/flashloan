@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+target/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Rust/Cargo
+Cargo.lock
+**/*.rs.bk
+target/
+
+# Solana
+test-ledger/
+*.so
+*.keypair
+
+# Desktop app
+desktop-admin/src-tauri/target/
+desktop-admin/dist/
+
+# Frontend
+.cache/
+.parcel-cache/
+
+# Backend
+backend/node_modules/
+backend/dist/
+
+# Production
+*.pem
+*.key
+*.cert
