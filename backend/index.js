@@ -7,10 +7,18 @@ import {
   initializeSolana, 
   executeFlashloan, 
   startPoolListener,
-  submitJitoBundle,
-  checkRPCHealth 
+  submitJitoBundleWithRetry,
+  checkRPCHealth,
+  getExecutionLogs,
+  getProfitEvents,
 } from './solana.js';
 import { SECURITY_CONFIG } from './config.js';
+import {
+  validateOrigin,
+  validateSignature,
+  rateLimit,
+  validateFlashloanRequest,
+} from './validation.js';
 
 dotenv.config();
 
@@ -26,6 +34,8 @@ const io = new Server(server, {
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: SECURITY_CONFIG.allowedOrigins, credentials: true }));
+app.use(validateOrigin); // Validate request origin
+app.use(rateLimit()); // Apply rate limiting
 
 // Initialize Solana connection
 initializeSolana();
@@ -55,14 +65,10 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// Execute flashloan
-app.post('/api/flashloan/execute', async (req, res) => {
+// Execute flashloan with validation
+app.post('/api/flashloan/execute', validateFlashloanRequest, async (req, res) => {
   try {
     const { wallet, amount, minProfit, providers, useJitoBundle } = req.body;
-    
-    if (!wallet || !amount) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
     
     const result = await executeFlashloan({
       wallet,
@@ -82,8 +88,8 @@ app.post('/api/flashloan/execute', async (req, res) => {
   }
 });
 
-// Submit Jito bundle
-app.post('/api/jito/bundle', async (req, res) => {
+// Submit Jito bundle with validation
+app.post('/api/jito/bundle', validateSignature, async (req, res) => {
   try {
     const { transactions, tipAmount } = req.body;
     
@@ -91,12 +97,25 @@ app.post('/api/jito/bundle', async (req, res) => {
       return res.status(400).json({ error: 'Invalid transactions' });
     }
     
-    const result = await submitJitoBundle(transactions, tipAmount || 1000);
+    const result = await submitJitoBundleWithRetry(transactions, tipAmount || 10000);
     res.json(result);
   } catch (error) {
     console.error('Jito bundle error:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// Get execution logs
+app.get('/api/logs/:executionId', (req, res) => {
+  const { executionId } = req.params;
+  const logs = getExecutionLogs(executionId);
+  res.json({ executionId, logs });
+});
+
+// Get all profit events
+app.get('/api/profits', (req, res) => {
+  const profits = getProfitEvents();
+  res.json({ profits });
 });
 
 // Bot management
