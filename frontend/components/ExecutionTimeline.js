@@ -1,6 +1,5 @@
 // Execution Timeline Visualizer Component
 import { useState, useEffect } from 'react';
-import styles from '../styles/neo-glow.css';
 
 export default function ExecutionTimeline({ executionData }) {
   const [timeline, setTimeline] = useState([]);

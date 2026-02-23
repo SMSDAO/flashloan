@@ -63,11 +63,10 @@ export function validateSignature(req, res, next) {
     return res.status(401).json({ error: 'Invalid API key' });
   }
   
-  // Verify signature
-  const body =
-    req.rawBody != null
-      ? (Buffer.isBuffer(req.rawBody) ? req.rawBody.toString('utf8') : String(req.rawBody))
-      : JSON.stringify(req.body || {});
+  // Verify signature using constant-time comparison
+  const body = req.rawBody != null
+    ? (Buffer.isBuffer(req.rawBody) ? req.rawBody.toString('utf8') : String(req.rawBody))
+    : JSON.stringify(req.body || {});
   const message = `${timestamp}:${req.method}:${req.path}:${body}`;
   const expectedSignature = crypto
     .createHmac('sha256', hmacSecret)

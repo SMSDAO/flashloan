@@ -6,6 +6,31 @@ Production-grade 2026 Solana flashloan arbitrage platform with multi-provider su
 ![Node](https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## 🚀 Quick Start (Easy Setup - No Conflicts)
+
+**One-command setup:**
+```bash
+./scripts/setup-env.sh  # Auto-configures .env with secure defaults
+npm run setup           # Installs all dependencies
+```
+
+**Start development (separate terminals):**
+```bash
+# Terminal 1 - Backend (Port 4000)
+cd backend && npm run dev
+
+# Terminal 2 - Frontend (Port 3000)
+cd frontend && npm run dev
+```
+
+**Access:**
+- Frontend: `http://localhost:3000` (automatically connects to backend)
+- Backend API: `http://localhost:4000`
+
+📖 **Full guide**: See [QUICKSTART.md](./QUICKSTART.md) for deployment, troubleshooting, and advanced configuration
+
+---
+
 ## ✨ Features
 
 ### Core Capabilities

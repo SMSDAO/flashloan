@@ -8,10 +8,10 @@ pub mod flashloan_arbitrage {
     use super::*;
 
     /// Initialize the flashloan arbitrage program
-    pub fn initialize(ctx: Context<Initialize>, bump: u8) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let state = &mut ctx.accounts.state;
         state.authority = ctx.accounts.authority.key();
-        state.bump = bump;
+        state.bump = ctx.bumps.state;
         state.total_volume = 0;
         state.total_profit = 0;
         state.execution_count = 0;

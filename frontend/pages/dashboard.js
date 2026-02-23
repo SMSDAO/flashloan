@@ -50,7 +50,9 @@ export default function Dashboard({ socket }) {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:4000/bots/execute', {
+      // Use environment variable or fallback to relative path (works with Vercel rewrites)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+      const response = await fetch(`${backendUrl}/api/bots/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ strategy, wallet, pool, token, amount })

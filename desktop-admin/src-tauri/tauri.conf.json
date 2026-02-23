@@ -12,10 +12,28 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true,
+      "all": false,
+      "fs": {
+        "scope": ["$APPDATA/*", "$APPLOCALDATA/*"],
+        "readFile": true,
+        "writeFile": true,
+        "readDir": true,
+        "createDir": true,
+        "removeFile": true
+      },
+      "path": {
+        "all": true
+      },
+      "dialog": {
+        "all": true
+      },
       "shell": {
         "all": false,
         "open": true
+      },
+      "http": {
+        "scope": ["http://localhost:4000/*", "https://*"],
+        "request": true
       }
     },
     "bundle": {

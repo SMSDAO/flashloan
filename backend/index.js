@@ -34,13 +34,8 @@ const io = new Server(server, {
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: SECURITY_CONFIG.allowedOrigins, credentials: true }));
-app.use(validateOrigin); // Validate request origin
-app.use(rateLimit()); // Apply rate limiting
 
-// Initialize Solana connection
-initializeSolana();
-
-// Health check
+// Health check - exempt from origin validation for monitoring tools
 app.get('/health', async (req, res) => {
   const rpcHealth = await checkRPCHealth();
   res.json({
@@ -49,6 +44,13 @@ app.get('/health', async (req, res) => {
     rpc: rpcHealth,
   });
 });
+
+// Apply security middleware to all other routes
+app.use(validateOrigin); // Validate request origin
+app.use(rateLimit()); // Apply rate limiting
+
+// Initialize Solana connection
+initializeSolana();
 
 // API Routes
 app.get('/api/status', (req, res) => {
