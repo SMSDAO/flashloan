@@ -38,28 +38,55 @@ export function validateSignature(req, res, next) {
   
   const signature = req.get('X-Signature');
   const timestamp = req.get('X-Timestamp');
-  const apiKey = req.get('X-API-Key') || process.env.ADMIN_API_KEY;
+  const apiKeyHeader = req.get('X-API-Key');
+  const serverApiKey = process.env.ADMIN_API_KEY;
+  const hmacSecret = process.env.SIGNING_SECRET || serverApiKey;
   
-  if (!signature || !timestamp || !apiKey) {
+  if (!signature || !timestamp || !apiKeyHeader || !serverApiKey || !hmacSecret) {
     return res.status(401).json({ error: 'Authentication required' });
   }
   
   // Check timestamp to prevent replay attacks (5 minute window)
   const now = Date.now();
   const requestTime = parseInt(timestamp);
-  if (Math.abs(now - requestTime) > 300000) {
+  if (Number.isNaN(requestTime) || Math.abs(now - requestTime) > 300000) {
     return res.status(401).json({ error: 'Request expired' });
   }
   
+  // Verify API key matches server-side configured key using constant-time comparison
+  const apiKeyHeaderBuffer = Buffer.from(apiKeyHeader, 'utf8');
+  const serverApiKeyBuffer = Buffer.from(serverApiKey, 'utf8');
+  if (
+    apiKeyHeaderBuffer.length !== serverApiKeyBuffer.length ||
+    !crypto.timingSafeEqual(apiKeyHeaderBuffer, serverApiKeyBuffer)
+  ) {
+    return res.status(401).json({ error: 'Invalid API key' });
+  }
+  
   // Verify signature
-  const body = JSON.stringify(req.body);
+  const body =
+    req.rawBody != null
+      ? (Buffer.isBuffer(req.rawBody) ? req.rawBody.toString('utf8') : String(req.rawBody))
+      : JSON.stringify(req.body || {});
   const message = `${timestamp}:${req.method}:${req.path}:${body}`;
   const expectedSignature = crypto
-    .createHmac('sha256', apiKey)
+    .createHmac('sha256', hmacSecret)
     .update(message)
     .digest('hex');
   
-  if (signature !== expectedSignature) {
+  let providedSigBuffer;
+  let expectedSigBuffer;
+  try {
+    providedSigBuffer = Buffer.from(signature, 'hex');
+    expectedSigBuffer = Buffer.from(expectedSignature, 'hex');
+  } catch {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  if (
+    providedSigBuffer.length !== expectedSigBuffer.length ||
+    !crypto.timingSafeEqual(providedSigBuffer, expectedSigBuffer)
+  ) {
     return res.status(401).json({ error: 'Invalid signature' });
   }
   
