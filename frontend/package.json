@@ -1,14 +1,33 @@
 {
   "name": "flashloan-frontend",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "Solana Flashloan Arbitrage Frontend - Neo Glow UI",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules npx jest --watch"
   },
   "dependencies": {
     "next": "^16.1.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "socket.io-client": "^4.8.0",
+    "recharts": "^2.12.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@swc/jest": "^0.2.29",
+    "@swc/core": "^1.7.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
