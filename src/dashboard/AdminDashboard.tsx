@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CoreDashboardLayout from './CoreDashboardLayout';
 
 export default function AdminDashboard() {
   const [prices, setPrices] = useState({});
@@ -12,8 +13,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
+    <CoreDashboardLayout title="Admin Dashboard">
       <section>
         <h2>Analytics</h2>
         <ul>
@@ -30,6 +30,6 @@ export default function AdminDashboard() {
         <h2>SPL Tokens</h2>
         <pre>{JSON.stringify(tokens, null, 2)}</pre>
       </section>
-    </div>
+    </CoreDashboardLayout>
   );
 }

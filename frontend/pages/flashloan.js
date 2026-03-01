@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import io from 'socket.io-client';
+import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+
+const widgets = [
+  <div>Flashloan Opportunity Widget</div>,
+  <div>Auto-Calculation Widget</div>,
+  <div>Wallet Scanner Widget</div>,
+  <div>Token Scanner Widget</div>,
+];
 
 export default function Flashloan() {
   const [result, setResult] = useState(null);
@@ -13,10 +21,13 @@ export default function Flashloan() {
   };
 
   return (
-    <div>
-      <h2>Execute Flashloan</h2>
+    <CoreDashboardLayout
+      title="Execute Flashloan"
+      widgets={widgets}
+      chat={<span>Flashloan Chat Placeholder</span>}
+    >
       <button onClick={executeFlashloan}>Run Flashloan</button>
       {result && <div>Result: {JSON.stringify(result)}</div>}
-    </div>
+    </CoreDashboardLayout>
   );
 }

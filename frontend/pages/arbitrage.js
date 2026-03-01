@@ -1,4 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+
+const widgets = [
+  <div>Arbitrage Strategy Widget</div>,
+  <div>Execution Result Widget</div>,
+  <div>Wallet Scanner Widget</div>
+];
 
 export default function Arbitrage() {
   const [strategies, setStrategies] = useState([]);
@@ -6,7 +13,7 @@ export default function Arbitrage() {
   const [selected, setSelected] = useState('triangle');
 
   // Fetch available strategies
-  React.useEffect(() => {
+  useEffect(() => {
     fetch('/strategies')
       .then(res => res.json())
       .then(data => setStrategies(data.strategies));
@@ -23,13 +30,12 @@ export default function Arbitrage() {
   };
 
   return (
-    <div>
-      <h2>Advanced Arbitrage</h2>
+    <CoreDashboardLayout title="Advanced Arbitrage" widgets={widgets} chat={<span>Arbitrage Chat Placeholder</span>}>
       <select value={selected} onChange={e => setSelected(e.target.value)}>
         {strategies.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
       <button onClick={execute}>Execute</button>
       {result && <div>Result: {JSON.stringify(result)}</div>}
-    </div>
+    </CoreDashboardLayout>
   );
 }

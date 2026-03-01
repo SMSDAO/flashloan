@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const app = express();
+const port = process.env.PORT || 4002;
+
+app.use('/market', router);
+
+app.listen(port, () => {
+  console.log(`Market service listening on port ${port}`);
+});
 
 // Live price endpoint
 router.get('/prices', async (req, res) => {

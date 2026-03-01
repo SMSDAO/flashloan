@@ -1,4 +1,11 @@
 import { useState, useEffect } from 'react';
+import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+
+const widgets = [
+  <div>Token List Widget</div>,
+  <div>Provider Sync Widget</div>,
+  <div>Wallet Scanner Widget</div>
+];
 
 export default function Tokens() {
   const [tokens, setTokens] = useState({});
@@ -8,14 +15,13 @@ export default function Tokens() {
       .then(setTokens);
   }, []);
   return (
-    <div>
-      <h2>Live Token List Sync</h2>
+    <CoreDashboardLayout title="Live Token List Sync" widgets={widgets} chat={<span>Tokens Chat Placeholder</span>}>
       {Object.entries(tokens).map(([provider, list]) => (
         <div key={provider}>
           <h3>{provider}</h3>
           <pre>{JSON.stringify(list, null, 2)}</pre>
         </div>
       ))}
-    </div>
+    </CoreDashboardLayout>
   );
 }

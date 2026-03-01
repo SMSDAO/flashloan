@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const app = express();
+const port = process.env.PORT || 4001;
+
+app.use('/api', router);
+
+app.listen(port, () => {
+  console.log(`API service listening on port ${port}`);
+});
 
 // Example: Get user profile
 router.get('/profile/:wallet', (req, res) => {

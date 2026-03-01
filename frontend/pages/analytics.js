@@ -1,4 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+
+const widgets = [
+  <div>Quest Widget</div>,
+  <div>Airdrop Widget</div>,
+  <div>Wallet Scanner Widget</div>,
+  <div>Token Scanner Widget</div>,
+  <div>Deep Monitoring Widget</div>,
+  <div>Analytics Widget</div>
+];
 
 export default function Analytics() {
   const [history, setHistory] = useState([]);
@@ -9,9 +19,9 @@ export default function Analytics() {
       .then(res => res.json())
       .then(setHistory);
   }, []);
+
   return (
-    <div>
-      <h2>Live Analytics</h2>
+    <CoreDashboardLayout title="Live Analytics" widgets={widgets} chat={<span>Analytics Chat Placeholder</span>}>
       <ul>
         {history.map((h, i) => (
           <li key={i}>
@@ -19,6 +29,6 @@ export default function Analytics() {
           </li>
         ))}
       </ul>
-    </div>
+    </CoreDashboardLayout>
   );
 }

@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
+
 export default function WalletLogin() {
-  const [wallet, setWallet] = useState(null);
-  const connectWallet = async () => {
-    // Placeholder for Solana wallet integration (e.g., Phantom)
-    setWallet('DemoWalletAddress123');
-  };
+  const [connected, setConnected] = useState(false);
+
+  function handleConnect() {
+    setConnected(true);
+  }
+
   return (
-    <div>
-      <button onClick={connectWallet}>Connect Solana Wallet</button>
-      {wallet && <div>Wallet Connected: {wallet}</div>}
+    <div style={{ marginBottom: '24px' }}>
+      {connected ? (
+        <div style={{ color: '#00ff99', fontWeight: 'bold' }}>
+          Wallet Connected!
+        </div>
+      ) : (
+        <button
+          style={{
+            background: 'linear-gradient(90deg,#a020f0,#00ff99)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '12px 32px',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            boxShadow: '0 0 10px #a020f0, 0 0 20px #00ff99',
+          }}
+          onClick={handleConnect}
+        >
+          Connect Wallet
+        </button>
+      )}
     </div>
   );
 }

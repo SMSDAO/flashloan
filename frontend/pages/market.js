@@ -1,4 +1,12 @@
 import { useEffect, useState } from 'react';
+import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+
+const widgets = [
+  <div>Market Price Widget</div>,
+  <div>Gas Estimate Widget</div>,
+  <div>Slippage Monitor Widget</div>,
+  <div>Wallet Scanner Widget</div>
+];
 
 export default function Market() {
   const [prices, setPrices] = useState(null);
@@ -12,11 +20,10 @@ export default function Market() {
       .then(setEstimate);
   }, []);
   return (
-    <div>
-      <h2>Live Market Data</h2>
+    <CoreDashboardLayout title="Live Market Data" widgets={widgets} chat={<span>Market Chat Placeholder</span>}>
       <div>Prices: {prices && JSON.stringify(prices)}</div>
       <div>Gas: {estimate && estimate.gas}</div>
       <div>Slippage: {estimate && estimate.slippage}</div>
-    </div>
+    </CoreDashboardLayout>
   );
 }
