@@ -4,7 +4,43 @@ Production-grade 2026 Solana flashloan arbitrage platform with multi-provider su
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-passing-success.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+## 📊 Test Status
+
+**✅ ALL TESTS PASSING** - 11/11 tests across 2 test suites
+
+| Component | Tests | Status |
+|-----------|-------|--------|
+| Backend   | 8/8   | ✅ Passing |
+| Frontend  | 3/3   | ✅ Passing |
+
+📖 **Detailed results**: See [docs/TEST_RESULTS.md](./docs/TEST_RESULTS.md)
+
+## 🖼️ Screenshots
+
+### Dashboard - Neo Glow UI
+![Dashboard](./docs/screenshots/dashboard-placeholder.md)
+*Real-time flashloan arbitrage monitoring with glassmorphism design*
+
+### Execution Timeline Visualizer
+![Timeline](./docs/screenshots/timeline-placeholder.md)
+*Stage-by-stage execution tracking with color-coded progress*
+
+### Profit Heatmap (24-hour)
+![Heatmap](./docs/screenshots/heatmap-placeholder.md)
+*Provider-based profit visualization across 24 hours*
+
+### Workflow Visualizer
+![Workflow](./docs/screenshots/workflow-placeholder.md)
+*8-stage arbitrage workflow with real-time progress*
+
+### Desktop Admin App
+![Admin](./docs/screenshots/admin-placeholder.md)
+*Windows 11 Tauri app for bot management and execution logs*
+
+---
 
 ## 🚀 Quick Start (Easy Setup - No Conflicts)
 
