@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
 
 const widgets = [

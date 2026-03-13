@@ -11,9 +11,11 @@ export default function CoreDashboardLayout({ title, children, widgets, chat }) 
             <li><Link href="/dashboard">Dashboard</Link></li>
             <li><Link href="/admin">Admin</Link></li>
             <li><Link href="/arbitrage">Arbitrage</Link></li>
+            <li><Link href="/flashloan">Flashloan</Link></li>
             <li><Link href="/analytics">Analytics</Link></li>
             <li><Link href="/tokens">Tokens</Link></li>
             <li><Link href="/market">Market</Link></li>
+            <li><Link href="/wallet">Wallet</Link></li>
             <li><Link href="/profile">Profile</Link></li>
             <li><Link href="/user">User</Link></li>
           </ul>
