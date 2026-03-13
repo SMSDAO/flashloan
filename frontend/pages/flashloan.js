@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import io from 'socket.io-client';
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const widgets = [
   <div>Flashloan Opportunity Widget</div>,

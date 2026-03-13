@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 

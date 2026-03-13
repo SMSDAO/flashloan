@@ -1,4 +1,4 @@
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 import WalletLogin from '../components/WalletLogin';
 
 const widgets = [

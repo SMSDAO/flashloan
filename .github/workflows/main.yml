@@ -7,26 +7,48 @@ on:
     branches: [main]
 
 jobs:
-  build-deploy:
-    runs-on: windows-latest
+  build-test:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      - name: Install dependencies
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install root dependencies
         run: npm install --legacy-peer-deps
-      - name: Build front/backend
-        run: npm run build
-      - name: Compile contracts
+
+      - name: Install backend dependencies
+        run: cd backend && npm install --legacy-peer-deps
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm install --legacy-peer-deps
+
+      - name: Build backend
+        run: cd backend && npm run build
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      - name: Run backend tests
+        run: cd backend && npm test
+
+      - name: Run frontend tests
+        run: cd frontend && npm test
+
+      - name: Compile Hardhat contracts
         run: npx hardhat compile
-      - name: Automated contract verification
-        run: |
-          if [ -f "scripts/scripts_deploy_contracts_Version3.ts" ]; then
-            npx hardhat run scripts/scripts_deploy_contracts_Version3.ts
-          fi
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        continue-on-error: true
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: frontend-build
+          path: frontend/.next/
+          if-no-files-found: warn

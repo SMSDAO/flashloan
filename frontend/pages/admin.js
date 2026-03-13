@@ -1,5 +1,5 @@
 import React from 'react';
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const widgets = [
   <div>Pool Monitor Widget</div>,

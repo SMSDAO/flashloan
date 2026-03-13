@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const widgets = [
   <div>Scoring Widget</div>,
