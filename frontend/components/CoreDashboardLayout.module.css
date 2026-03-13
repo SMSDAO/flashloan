@@ -1,0 +1,120 @@
+/* CoreDashboardLayout.css */
+
+.core-dashboard {
+  max-width: 1200px;
+  margin: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  background: #f5f7fa;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.core-dashboard-sidebar {
+  width: 220px;
+  background: #23272f;
+  color: #fff;
+  padding: 24px 12px;
+  border-radius: 12px;
+  margin-right: 32px;
+  min-height: 600px;
+}
+
+.core-dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.core-dashboard-header {
+  margin-bottom: 24px;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #23272f;
+}
+
+.core-dashboard-widgets {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.core-dashboard-widget {
+  background: #181c2b;
+  border-radius: 16px;
+  box-shadow:
+    0 0 24px 4px #00ffb3aa,
+    0 0 48px 8px #7c3aed55,
+    0 0 12px 2px #00ffb3,
+    0 0 32px 8px #39ff14;
+  padding: 20px;
+  min-width: 200px;
+  position: relative;
+  transition: box-shadow 0.3s;
+}
+
+.core-dashboard-widget::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  box-shadow:
+    0 0 32px 8px #39ff14,
+    0 0 24px 4px #00ffb3aa,
+    0 0 48px 8px #7c3aed55;
+  opacity: 0.7;
+}
+
+.core-dashboard-widget:hover {
+  box-shadow:
+    0 0 48px 12px #00ffb3,
+    0 0 64px 16px #7c3aed,
+    0 0 24px 6px #39ff14;
+}
+
+/* 3D cosmic effect container */
+.cosmic-3d-container {
+  width: 100%;
+  height: 320px;
+  background: radial-gradient(circle at 60% 40%, #7c3aed 0%, #181c2b 100%);
+  border-radius: 24px;
+  box-shadow: 0 0 64px 16px #7c3aed55;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.core-dashboard-chat {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 16px;
+  margin-top: 24px;
+  min-height: 180px;
+}
+
+.core-dashboard-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.core-dashboard-menu li {
+  margin-bottom: 16px;
+}
+
+.core-dashboard-menu a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.core-dashboard-menu a:hover {
+  color: #ffd700;
+}
+
+.test-monitoring-widget-results {
+  margin-top: 16px;
+}

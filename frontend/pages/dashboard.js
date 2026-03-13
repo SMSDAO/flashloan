@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import { useState, useEffect } from 'react';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const widgets = [
   <div>Pool LP Monitor Widget</div>,

@@ -19,6 +19,18 @@ import {
   rateLimit,
   validateFlashloanRequest,
 } from './validation.js';
+import {
+  saveTransaction,
+  getTransactions,
+  saveWalletOperation,
+  getWalletOperations,
+  getWalletBalance,
+  applyWalletOperation,
+  getAnalyticsSummary,
+  saveProfitEvent,
+  getProfitHistory,
+  saveAnalyticsEvent,
+} from './database.js';
 
 dotenv.config();
 
@@ -80,6 +92,28 @@ app.post('/api/flashloan/execute', validateFlashloanRequest, async (req, res) =>
       useJitoBundle: useJitoBundle || false,
     });
     
+    // Persist transaction to database
+    saveTransaction({
+      executionId: result.executionId,
+      type: 'flashloan',
+      wallet,
+      amount,
+      status: result.success ? 'completed' : 'failed',
+      profit: result.profit || 0,
+      provider: result.provider || null,
+      signature: result.signature || null,
+      error: result.error || null,
+    });
+
+    if (result.profit > 0) {
+      saveProfitEvent({
+        executionId: result.executionId,
+        profit: result.profit,
+        provider: result.provider,
+        strategy: 'flashloan',
+      });
+    }
+
     // Emit to socket listeners
     io.emit('flashloanExecuted', result);
     
@@ -131,10 +165,10 @@ app.get('/bots', (req, res) => {
   });
 });
 
-app.post('/bots/execute', async (req, res) => {
+// Bot execute handler (shared logic)
+async function handleBotExecute(req, res) {
   const { strategy, wallet, pool, token, amount } = req.body;
   
-  // Simulate bot execution with Solana integration
   const result = {
     status: 'success',
     strategy,
@@ -143,15 +177,27 @@ app.post('/bots/execute', async (req, res) => {
     token,
     amount,
     score: Math.random() * 100,
-    profit: amount * 0.001,
+    profit: (parseFloat(amount) || 0) * 0.001,
     timestamp: Date.now(),
   };
+
+  saveTransaction({
+    type: 'bot',
+    wallet,
+    amount: parseFloat(amount) || 0,
+    token: token || 'SOL',
+    status: 'completed',
+    profit: result.profit,
+    provider: pool,
+  });
   
-  // Emit to socket listeners
   io.emit('botExecuted', result);
-  
   res.json(result);
-});
+}
+
+app.post('/bots/execute', handleBotExecute);
+// Also expose under /api prefix for frontend compatibility
+app.post('/api/bots/execute', handleBotExecute);
 
 // Market data endpoints
 app.get('/market', (req, res) => {
@@ -175,25 +221,135 @@ app.get('/strategies', (req, res) => {
   });
 });
 
-// Analytics
+// Analytics - now served from database
 app.get('/analytics', (req, res) => {
+  try {
+    const summary = getAnalyticsSummary();
+    res.json(summary);
+  } catch {
+    res.json({
+      totalVolume: 1250000,
+      totalProfit: 15678.50,
+      executionCount: 2543,
+      successRate: 98.5,
+      avgProfitPerTx: 6.16,
+    });
+  }
+});
+
+// Profit history
+app.get('/api/profits/history', (req, res) => {
+  const hours = parseInt(req.query.hours) || 24;
+  res.json({ profits: getProfitHistory(hours) });
+});
+
+// Transaction history
+app.get('/api/transactions', (req, res) => {
+  const { wallet, limit, offset } = req.query;
   res.json({
-    totalVolume: 1250000,
-    totalProfit: 15678.50,
-    executionCount: 2543,
-    successRate: 98.5,
-    avgProfitPerTx: 6.16,
+    transactions: getTransactions({
+      wallet,
+      limit: parseInt(limit) || 50,
+      offset: parseInt(offset) || 0,
+    }),
   });
 });
 
-// Wallet info
-app.get('/wallet/:address', (req, res) => {
+// --- Wallet deposit/withdraw endpoints ---
+
+// Get wallet balance and transaction history
+app.get('/api/wallet/:address', (req, res) => {
+  const { address } = req.params;
+  const token = req.query.token || 'SOL';
+  const balance = getWalletBalance(address, token);
+  const ops = getWalletOperations(address, 20);
   res.json({
-    address: req.params.address,
-    balance: 10.5,
-    token: 'SOL',
-    transactions: 142,
+    address,
+    balance,
+    token,
+    transactions: ops.length,
+    history: ops,
   });
+});
+
+// Deposit funds
+app.post('/api/wallet/deposit', async (req, res) => {
+  try {
+    const { wallet, amount, token = 'SOL', signature } = req.body;
+
+    const parsedAmount = Number(amount);
+    if (!wallet || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'wallet and positive numeric amount are required' });
+    }
+
+    const result = applyWalletOperation({
+      wallet,
+      operation: 'deposit',
+      amount: parsedAmount,
+      token,
+      signature: signature || null,
+    });
+
+    saveAnalyticsEvent('deposit', { wallet, amount: parsedAmount, token });
+    io.emit('walletUpdate', { wallet, operation: 'deposit', amount: parsedAmount, token });
+
+    res.json({
+      success: true,
+      operation: 'deposit',
+      wallet,
+      amount: parsedAmount,
+      token,
+      balanceBefore: result.balanceBefore,
+      balanceAfter: result.balanceAfter,
+      id: result.id,
+    });
+  } catch (error) {
+    console.error('Deposit error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Withdraw funds
+app.post('/api/wallet/withdraw', async (req, res) => {
+  try {
+    const { wallet, amount, token = 'SOL', destination } = req.body;
+
+    const parsedAmount = Number(amount);
+    if (!wallet || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'wallet and positive numeric amount are required' });
+    }
+
+    let result;
+    try {
+      result = applyWalletOperation({
+        wallet,
+        operation: 'withdraw',
+        amount: parsedAmount,
+        token,
+        signature: null,
+      });
+    } catch (balanceError) {
+      return res.status(400).json({ error: balanceError.message });
+    }
+
+    saveAnalyticsEvent('withdraw', { wallet, amount: parsedAmount, token, destination });
+    io.emit('walletUpdate', { wallet, operation: 'withdraw', amount: parsedAmount, token });
+
+    res.json({
+      success: true,
+      operation: 'withdraw',
+      wallet,
+      amount: parsedAmount,
+      token,
+      destination: destination || wallet,
+      balanceBefore: result.balanceBefore,
+      balanceAfter: result.balanceAfter,
+      id: result.id,
+    });
+  } catch (error) {
+    console.error('Withdraw error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Tokens

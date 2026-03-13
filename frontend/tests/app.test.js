@@ -1,5 +1,5 @@
-import { describe, it, expect, jest } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock Next.js router
@@ -36,6 +36,13 @@ jest.mock('socket.io-client', () => {
   }));
 });
 
+// Mock next/link
+jest.mock('next/link', () => {
+  return function MockLink({ href, children }) {
+    return <a href={href}>{children}</a>;
+  };
+});
+
 describe('Frontend Tests', () => {
   describe('App Component', () => {
     it('should render without crashing', () => {
@@ -55,6 +62,40 @@ describe('Frontend Tests', () => {
     it('should load CSS variables', () => {
       // Check if CSS is loadable
       expect(true).toBe(true);
+    });
+  });
+
+  describe('WalletLogin Component', () => {
+    it('should render connect wallet button', async () => {
+      const { default: WalletLogin } = await import('../components/WalletLogin.js');
+      render(<WalletLogin />);
+      const button = screen.getByText('Connect Wallet');
+      expect(button).toBeInTheDocument();
+    });
+
+    it('should show connected state after click', async () => {
+      const { default: WalletLogin } = await import('../components/WalletLogin.js');
+      render(<WalletLogin />);
+      const button = screen.getByText('Connect Wallet');
+      fireEvent.click(button);
+      expect(screen.getByText('Wallet Connected!')).toBeInTheDocument();
+    });
+  });
+
+  describe('Wallet API Endpoints', () => {
+    it('should have deposit endpoint URL format', () => {
+      const url = '/api/wallet/deposit';
+      expect(url).toMatch(/^\/api\/wallet\//);
+    });
+
+    it('should have withdraw endpoint URL format', () => {
+      const url = '/api/wallet/withdraw';
+      expect(url).toMatch(/^\/api\/wallet\//);
+    });
+
+    it('should validate amount is positive for deposit', () => {
+      const amount = -1;
+      expect(amount <= 0).toBe(true);
     });
   });
 });

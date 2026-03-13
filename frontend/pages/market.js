@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import CoreDashboardLayout from '../../src/dashboard/CoreDashboardLayout';
+import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const widgets = [
   <div>Market Price Widget</div>,
