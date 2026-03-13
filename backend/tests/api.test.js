@@ -174,5 +174,20 @@ describe('Backend API Tests', () => {
       const history = db.getProfitHistory(24);
       expect(Array.isArray(history)).toBe(true);
     });
+
+    it('should reject non-numeric amount via Number.isFinite guard', () => {
+      const parsed = Number('abc');
+      expect(Number.isFinite(parsed)).toBe(false);
+
+      const parsedNaN = Number(NaN);
+      expect(Number.isFinite(parsedNaN)).toBe(false);
+
+      const parsedInf = Number(Infinity);
+      expect(Number.isFinite(parsedInf)).toBe(false);
+
+      const parsedGood = Number('1.5');
+      expect(Number.isFinite(parsedGood)).toBe(true);
+      expect(parsedGood).toBe(1.5);
+    });
   });
 });

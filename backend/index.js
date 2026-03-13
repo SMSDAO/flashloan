@@ -277,26 +277,27 @@ app.post('/api/wallet/deposit', async (req, res) => {
   try {
     const { wallet, amount, token = 'SOL', signature } = req.body;
 
-    if (!wallet || !amount || amount <= 0) {
-      return res.status(400).json({ error: 'wallet and positive amount are required' });
+    const parsedAmount = Number(amount);
+    if (!wallet || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'wallet and positive numeric amount are required' });
     }
 
     const result = applyWalletOperation({
       wallet,
       operation: 'deposit',
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       token,
       signature: signature || null,
     });
 
-    saveAnalyticsEvent('deposit', { wallet, amount, token });
-    io.emit('walletUpdate', { wallet, operation: 'deposit', amount, token });
+    saveAnalyticsEvent('deposit', { wallet, amount: parsedAmount, token });
+    io.emit('walletUpdate', { wallet, operation: 'deposit', amount: parsedAmount, token });
 
     res.json({
       success: true,
       operation: 'deposit',
       wallet,
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       token,
       balanceBefore: result.balanceBefore,
       balanceAfter: result.balanceAfter,
@@ -313,8 +314,9 @@ app.post('/api/wallet/withdraw', async (req, res) => {
   try {
     const { wallet, amount, token = 'SOL', destination } = req.body;
 
-    if (!wallet || !amount || amount <= 0) {
-      return res.status(400).json({ error: 'wallet and positive amount are required' });
+    const parsedAmount = Number(amount);
+    if (!wallet || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'wallet and positive numeric amount are required' });
     }
 
     let result;
@@ -322,7 +324,7 @@ app.post('/api/wallet/withdraw', async (req, res) => {
       result = applyWalletOperation({
         wallet,
         operation: 'withdraw',
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         token,
         signature: null,
       });
@@ -330,14 +332,14 @@ app.post('/api/wallet/withdraw', async (req, res) => {
       return res.status(400).json({ error: balanceError.message });
     }
 
-    saveAnalyticsEvent('withdraw', { wallet, amount, token, destination });
-    io.emit('walletUpdate', { wallet, operation: 'withdraw', amount, token });
+    saveAnalyticsEvent('withdraw', { wallet, amount: parsedAmount, token, destination });
+    io.emit('walletUpdate', { wallet, operation: 'withdraw', amount: parsedAmount, token });
 
     res.json({
       success: true,
       operation: 'withdraw',
       wallet,
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       token,
       destination: destination || wallet,
       balanceBefore: result.balanceBefore,
