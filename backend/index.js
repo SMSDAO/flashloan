@@ -404,6 +404,9 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
   
+  // Track subscriptions created by this socket for cleanup
+  const socketSubscriptions = [];
+
   // Flashloan execution
   socket.on('flashloan', async (data) => {
     try {
@@ -417,9 +420,22 @@ io.on('connection', (socket) => {
   
   // Pool monitoring
   socket.on('subscribePool', (poolAddress) => {
+    // Input validation: Solana public keys are 32-44 base58 characters
+    if (
+      typeof poolAddress !== 'string' ||
+      !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(poolAddress)
+    ) {
+      socket.emit('subscribeError', { error: 'Invalid pool address' });
+      return;
+    }
     console.log('Pool subscription:', poolAddress);
+    // Track subscription handle so it can be removed on disconnect
+    const handle = { pool: poolAddress, active: true };
+    socketSubscriptions.push(handle);
     startPoolListener([poolAddress], (update) => {
-      socket.emit('poolUpdate', update);
+      if (handle.active) {
+        socket.emit('poolUpdate', update);
+      }
     });
   });
   
@@ -431,6 +447,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
+    // Deactivate all pool subscriptions for this socket to prevent stale emits
+    socketSubscriptions.forEach(handle => { handle.active = false; });
     console.log('Socket disconnected:', socket.id);
   });
 });

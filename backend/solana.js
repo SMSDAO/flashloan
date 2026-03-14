@@ -176,6 +176,9 @@ export async function optimizeFees(connection, executionId = null) {
   return FEE_CONFIG.minTipLamports;
 }
 
+// Reentrancy guard: track in-flight executions per wallet
+const _executionLocks = new Set();
+
 // Multi-provider flashloan execution with profit events and execution timeline
 export async function executeFlashloan(params) {
   const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -193,6 +196,23 @@ export async function executeFlashloan(params) {
   if (!wallet || !amount) {
     throw new Error('Wallet and amount are required');
   }
+  
+  // Reentrancy guard: reject concurrent executions for the same wallet
+  if (_executionLocks.has(wallet)) {
+    throw new Error('Execution already in progress for this wallet');
+  }
+  _executionLocks.add(wallet);
+  
+  try {
+    return await _executeFlashloanInner({ wallet, amount, minProfit, providers, useJitoBundle, executionId, timeline });
+  } finally {
+    _executionLocks.delete(wallet);
+  }
+}
+
+// Inner execution logic (called with reentrancy guard held)
+async function _executeFlashloanInner(params) {
+  const { wallet, amount, minProfit, providers, useJitoBundle, executionId, timeline } = params;
   
   timeline.push({ stage: 'init', timestamp: Date.now(), status: 'started' });
   
@@ -241,6 +261,29 @@ export async function executeFlashloan(params) {
       // Calculate profit
       const profit = calculateProfit(amount, providers);
       timeline.push({ stage: 'profit_calculation', timestamp: Date.now(), profit });
+      
+      // Enforce minimum profit threshold before completing
+      if (minProfit > 0 && profit < minProfit) {
+        logger.log({
+          level: 'warn',
+          category: 'flashloan',
+          message: 'Profit below minimum threshold, aborting',
+          data: { profit, minProfit },
+          executionId,
+        });
+        return {
+          executionId,
+          wallet,
+          amount,
+          providers,
+          profit,
+          profitPercentage: (profit / amount) * 100,
+          timeline,
+          status: 'skipped',
+          reason: 'profit_below_minimum',
+          timestamp: new Date().toISOString(),
+        };
+      }
       
       // Emit profit event
       const profitEvent = {
