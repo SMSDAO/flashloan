@@ -176,6 +176,9 @@ export async function optimizeFees(connection, executionId = null) {
   return FEE_CONFIG.minTipLamports;
 }
 
+// Reentrancy guard: track in-flight executions per wallet
+const _executionLocks = new Set();
+
 // Multi-provider flashloan execution with profit events and execution timeline
 export async function executeFlashloan(params) {
   const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -194,6 +197,23 @@ export async function executeFlashloan(params) {
     throw new Error('Wallet and amount are required');
   }
   
+  // Reentrancy guard: reject concurrent executions for the same wallet
+  if (_executionLocks.has(wallet)) {
+    throw new Error('Execution already in progress for this wallet');
+  }
+  _executionLocks.add(wallet);
+  
+  try {
+    return await _executeFlashloanInner({ wallet, amount, minProfit, providers, useJitoBundle, executionId, timeline });
+  } finally {
+    _executionLocks.delete(wallet);
+  }
+}
+
+// Inner execution logic (called with reentrancy guard held)
+async function _executeFlashloanInner(params) {
+  const { wallet, amount, minProfit, providers, useJitoBundle, executionId, timeline } = params;
+  
   timeline.push({ stage: 'init', timestamp: Date.now(), status: 'started' });
   
   logger.log({
@@ -205,6 +225,33 @@ export async function executeFlashloan(params) {
   });
   
   const conn = getConnection();
+  
+  // Estimate profit eagerly — before any RPC call or fee spend — so we can
+  // abort immediately if the expected profit is below the caller's threshold.
+  const estimatedProfit = calculateProfit(amount, providers);
+  if (minProfit > 0 && estimatedProfit < minProfit) {
+    const earlySkip = {
+      executionId,
+      wallet,
+      amount,
+      providers,
+      profit: estimatedProfit,
+      profitPercentage: (estimatedProfit / amount) * 100,
+      timeline: [{ stage: 'init', timestamp: Date.now(), status: 'started' }],
+      status: 'skipped',
+      reason: 'profit_below_minimum',
+      timestamp: new Date().toISOString(),
+    };
+    logger.log({
+      level: 'warn',
+      category: 'flashloan',
+      message: 'Estimated profit below minimum threshold, skipping before fee spend',
+      data: { estimatedProfit, minProfit },
+      executionId,
+    });
+    return earlySkip;
+  }
+  
   let retryCount = 0;
   const maxRetries = 3;
   
@@ -238,8 +285,8 @@ export async function executeFlashloan(params) {
         timeline.push({ stage: 'standard_submission', timestamp: Date.now(), status: 'completed', signature: result.txSignature });
       }
       
-      // Calculate profit
-      const profit = calculateProfit(amount, providers);
+      // Use the pre-calculated profit (same deterministic function)
+      const profit = estimatedProfit;
       timeline.push({ stage: 'profit_calculation', timestamp: Date.now(), profit });
       
       // Emit profit event
@@ -358,9 +405,12 @@ function calculateProfit(amount, providers) {
   return baseProfit + providerBonus;
 }
 
-// Listen for liquidity pool updates (parallel workflow listener)
+// Listen for liquidity pool updates (parallel workflow listener).
+// Returns an array of subscription IDs that can be passed to
+// connection.removeAccountChangeListener() for cleanup.
 export async function startPoolListener(pools, callback) {
   const conn = getConnection();
+  const subscriptionIds = [];
   
   console.log('Starting pool listeners for:', pools);
   
@@ -380,8 +430,11 @@ export async function startPoolListener(pools, callback) {
       'confirmed'
     );
     
+    subscriptionIds.push(subscriptionId);
     console.log('Pool listener started for:', pool, 'subscription:', subscriptionId);
   });
+  
+  return subscriptionIds;
 }
 
 // Jito MEV bundle submission with retry logic and fallback

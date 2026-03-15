@@ -11,6 +11,7 @@ import {
   checkRPCHealth,
   getExecutionLogs,
   getProfitEvents,
+  getConnection,
 } from './solana.js';
 import { SECURITY_CONFIG } from './config.js';
 import {
@@ -404,6 +405,9 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
   
+  // Track RPC subscription IDs created by this socket for cleanup on disconnect
+  const socketSubscriptionIds = [];
+
   // Flashloan execution
   socket.on('flashloan', async (data) => {
     try {
@@ -416,11 +420,26 @@ io.on('connection', (socket) => {
   });
   
   // Pool monitoring
-  socket.on('subscribePool', (poolAddress) => {
+  socket.on('subscribePool', async (poolAddress) => {
+    // Input validation: Solana public keys are 32-44 base58 characters
+    if (
+      typeof poolAddress !== 'string' ||
+      !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(poolAddress)
+    ) {
+      socket.emit('subscribeError', { error: 'Invalid pool address' });
+      return;
+    }
     console.log('Pool subscription:', poolAddress);
-    startPoolListener([poolAddress], (update) => {
-      socket.emit('poolUpdate', update);
-    });
+    try {
+      // startPoolListener constructs PublicKey internally — catch any constructor errors
+      const subscriptionIds = await startPoolListener([poolAddress], (update) => {
+        socket.emit('poolUpdate', update);
+      });
+      // Store IDs so they can be removed when this socket disconnects
+      socketSubscriptionIds.push(...subscriptionIds);
+    } catch (err) {
+      socket.emit('subscribeError', { error: 'Failed to subscribe to pool: ' + err.message });
+    }
   });
   
   // Bot control
@@ -431,6 +450,15 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
+    // Remove all RPC account-change subscriptions for this socket to prevent leaks
+    if (socketSubscriptionIds.length > 0) {
+      const conn = getConnection();
+      socketSubscriptionIds.forEach(id => {
+        conn.removeAccountChangeListener(id).catch(() => {
+          // Ignore errors during cleanup (e.g., already removed)
+        });
+      });
+    }
     console.log('Socket disconnected:', socket.id);
   });
 });
