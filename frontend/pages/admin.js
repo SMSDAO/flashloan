@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useRef } from 'react';
 import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const glassCard = {
@@ -13,7 +13,6 @@ const glassCard = {
 };
 
 const neonPurple = { color: '#a020f0', textShadow: '0 0 8px #a020f0, 0 0 16px #00ff99' };
-const neonGreen = { color: '#00ff99', textShadow: '0 0 8px #00ff99' };
 const labelStyle = { color: '#a0aec0', fontSize: '0.78rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' };
 const valueStyle = { color: '#fff', fontSize: '1.4rem', fontWeight: 700 };
 
@@ -52,6 +51,7 @@ const widgets = [
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('overview');
+  const tabRefs = useRef([]);
 
   const tabs = [
     { id: 'overview', label: '📊 Overview' },
@@ -60,28 +60,56 @@ export default function AdminPanel() {
     { id: 'config', label: '⚙️ Config' },
   ];
 
+  // Keyboard navigation: arrow keys move focus between tabs
+  const handleTabKeyDown = (e, index) => {
+    let next = index;
+    if (e.key === 'ArrowRight') next = (index + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = tabs.length - 1;
+    else return;
+    e.preventDefault();
+    setActiveTab(tabs[next].id);
+    tabRefs.current[next]?.focus();
+  };
+
   return (
     <CoreDashboardLayout title="Admin Dashboard" widgets={widgets} chat={<span style={neonPurple}>🛡️ Admin Console</span>}>
       <div style={{ color: '#e2e8f0', fontFamily: "'Montserrat', sans-serif" }}>
 
-        {/* Tab Navigation */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-              background: activeTab === t.id ? 'linear-gradient(135deg, #a020f0, #00ff99)' : 'rgba(255,255,255,0.05)',
-              color: activeTab === t.id ? '#fff' : '#a0aec0',
-              border: activeTab === t.id ? 'none' : '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '10px', padding: '8px 18px', cursor: 'pointer',
-              fontWeight: activeTab === t.id ? 700 : 400, fontSize: '0.88rem',
-              boxShadow: activeTab === t.id ? '0 0 16px rgba(160,32,240,0.4)' : 'none',
-              transition: 'all 0.2s',
-            }}>{t.label}</button>
+        {/* Tab Navigation - accessible tablist */}
+        <div
+          role="tablist"
+          aria-label="Admin dashboard sections"
+          style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}
+        >
+          {tabs.map((t, i) => (
+            <button
+              key={t.id}
+              ref={el => { tabRefs.current[i] = el; }}
+              role="tab"
+              aria-selected={activeTab === t.id}
+              aria-controls={`tabpanel-${t.id}`}
+              id={`tab-${t.id}`}
+              tabIndex={activeTab === t.id ? 0 : -1}
+              onClick={() => setActiveTab(t.id)}
+              onKeyDown={e => handleTabKeyDown(e, i)}
+              style={{
+                background: activeTab === t.id ? 'linear-gradient(135deg, #a020f0, #00ff99)' : 'rgba(255,255,255,0.05)',
+                color: activeTab === t.id ? '#fff' : '#a0aec0',
+                border: activeTab === t.id ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '10px', padding: '8px 18px', cursor: 'pointer',
+                fontWeight: activeTab === t.id ? 700 : 400, fontSize: '0.88rem',
+                boxShadow: activeTab === t.id ? '0 0 16px rgba(160,32,240,0.4)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >{t.label}</button>
           ))}
         </div>
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <>
+          <div role="tabpanel" id="tabpanel-overview" aria-labelledby="tab-overview">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '20px' }}>
               {SYSTEM_STATS.map(s => (
                 <div key={s.label} style={glassCard}>
@@ -115,12 +143,12 @@ export default function AdminPanel() {
                 </div>
               ))}
             </div>
-          </>
+          </div>
         )}
 
         {/* Users Tab */}
         {activeTab === 'users' && (
-          <div style={glassCard}>
+          <div role="tabpanel" id="tabpanel-users" aria-labelledby="tab-users" style={glassCard}>
             <div style={{ ...neonPurple, fontSize: '1.1rem', fontWeight: 700, marginBottom: '14px' }}>👥 User Management</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
@@ -171,7 +199,7 @@ export default function AdminPanel() {
 
         {/* Audit Log Tab */}
         {activeTab === 'audit' && (
-          <div style={glassCard}>
+          <div role="tabpanel" id="tabpanel-audit" aria-labelledby="tab-audit" style={glassCard}>
             <div style={{ ...neonPurple, fontSize: '1.1rem', fontWeight: 700, marginBottom: '14px' }}>📋 Audit Trail</div>
             {AUDIT_LOGS.map((log, i) => (
               <div key={i} style={{
@@ -194,7 +222,7 @@ export default function AdminPanel() {
 
         {/* Config Tab */}
         {activeTab === 'config' && (
-          <div style={glassCard}>
+          <div role="tabpanel" id="tabpanel-config" aria-labelledby="tab-config" style={glassCard}>
             <div style={{ ...neonPurple, fontSize: '1.1rem', fontWeight: 700, marginBottom: '14px' }}>⚙️ System Configuration</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               {[

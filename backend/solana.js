@@ -225,6 +225,33 @@ async function _executeFlashloanInner(params) {
   });
   
   const conn = getConnection();
+  
+  // Estimate profit eagerly — before any RPC call or fee spend — so we can
+  // abort immediately if the expected profit is below the caller's threshold.
+  const estimatedProfit = calculateProfit(amount, providers);
+  if (minProfit > 0 && estimatedProfit < minProfit) {
+    const earlySkip = {
+      executionId,
+      wallet,
+      amount,
+      providers,
+      profit: estimatedProfit,
+      profitPercentage: (estimatedProfit / amount) * 100,
+      timeline: [{ stage: 'init', timestamp: Date.now(), status: 'started' }],
+      status: 'skipped',
+      reason: 'profit_below_minimum',
+      timestamp: new Date().toISOString(),
+    };
+    logger.log({
+      level: 'warn',
+      category: 'flashloan',
+      message: 'Estimated profit below minimum threshold, skipping before fee spend',
+      data: { estimatedProfit, minProfit },
+      executionId,
+    });
+    return earlySkip;
+  }
+  
   let retryCount = 0;
   const maxRetries = 3;
   
@@ -258,32 +285,9 @@ async function _executeFlashloanInner(params) {
         timeline.push({ stage: 'standard_submission', timestamp: Date.now(), status: 'completed', signature: result.txSignature });
       }
       
-      // Calculate profit
-      const profit = calculateProfit(amount, providers);
+      // Use the pre-calculated profit (same deterministic function)
+      const profit = estimatedProfit;
       timeline.push({ stage: 'profit_calculation', timestamp: Date.now(), profit });
-      
-      // Enforce minimum profit threshold before completing
-      if (minProfit > 0 && profit < minProfit) {
-        logger.log({
-          level: 'warn',
-          category: 'flashloan',
-          message: 'Profit below minimum threshold, aborting',
-          data: { profit, minProfit },
-          executionId,
-        });
-        return {
-          executionId,
-          wallet,
-          amount,
-          providers,
-          profit,
-          profitPercentage: (profit / amount) * 100,
-          timeline,
-          status: 'skipped',
-          reason: 'profit_below_minimum',
-          timestamp: new Date().toISOString(),
-        };
-      }
       
       // Emit profit event
       const profitEvent = {
@@ -401,9 +405,12 @@ function calculateProfit(amount, providers) {
   return baseProfit + providerBonus;
 }
 
-// Listen for liquidity pool updates (parallel workflow listener)
+// Listen for liquidity pool updates (parallel workflow listener).
+// Returns an array of subscription IDs that can be passed to
+// connection.removeAccountChangeListener() for cleanup.
 export async function startPoolListener(pools, callback) {
   const conn = getConnection();
+  const subscriptionIds = [];
   
   console.log('Starting pool listeners for:', pools);
   
@@ -423,8 +430,11 @@ export async function startPoolListener(pools, callback) {
       'confirmed'
     );
     
+    subscriptionIds.push(subscriptionId);
     console.log('Pool listener started for:', pool, 'subscription:', subscriptionId);
   });
+  
+  return subscriptionIds;
 }
 
 // Jito MEV bundle submission with retry logic and fallback

@@ -41,6 +41,39 @@ describe('Backend API Tests', () => {
       const connection = solana.initializeSolana();
       expect(connection).toBeDefined();
     });
+
+    it('should reject concurrent executions for the same wallet (reentrancy guard)', async () => {
+      const { executeFlashloan } = await import('../solana.js');
+      // Use a high minProfit so the first call returns immediately (no RPC needed)
+      const params = {
+        wallet: 'ReentrancyTestWallet111111111111111111',
+        amount: 1,
+        providers: ['Raydium'],
+        minProfit: 999, // well above any estimated profit → skips before RPC
+      };
+      // Start first execution (do not await yet) — lock is acquired synchronously
+      const first = executeFlashloan(params);
+      // Second call for the same wallet must throw immediately while first holds the lock
+      await expect(executeFlashloan(params)).rejects.toThrow('Execution already in progress for this wallet');
+      // Wait for first to finish and assert it completed as expected (skipped due to minProfit)
+      const firstResult = await first;
+      expect(firstResult.status).toBe('skipped');
+    });
+
+    it('should skip execution when estimated profit is below minProfit', async () => {
+      const { executeFlashloan } = await import('../solana.js');
+      // calculateProfit: baseProfit = amount * 0.0005, providerBonus = providers.length * 0.0002 * amount
+      // For amount=1, providers=['Raydium']: profit = 0.0005 + 0.0002 = 0.0007
+      // Set minProfit above that to trigger a skip
+      const result = await executeFlashloan({
+        wallet: 'MinProfitTestWallet1111111111111111111',
+        amount: 1,
+        providers: ['Raydium'],
+        minProfit: 1.0, // much higher than the ~0.0007 estimated profit
+      });
+      expect(result.status).toBe('skipped');
+      expect(result.reason).toBe('profit_below_minimum');
+    });
   });
 
   describe('Network Optimizer', () => {

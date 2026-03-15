@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CoreDashboardLayout from '../components/CoreDashboardLayout';
 
 const glassCard = {
@@ -40,10 +40,10 @@ const widgets = [
 
 export default function UserPanel() {
   const [address] = useState('4xK8...m9Pq');
-  const [notifications, setNotifications] = useState([
+  const notifications = [
     { id: 1, msg: 'New arbitrage opportunity detected on Raydium', time: '1 min ago' },
     { id: 2, msg: 'Daily profit milestone reached: 0.5 SOL', time: '2 hr ago' },
-  ]);
+  ];
 
   return (
     <CoreDashboardLayout title="User Dashboard" widgets={widgets} chat={<span style={neonText}>💬 AI Assistant</span>}>
@@ -60,7 +60,12 @@ export default function UserPanel() {
           <div>
             <div style={{ ...neonText, fontSize: '1.2rem', fontWeight: 700 }}>Solana Trader</div>
             <div style={{ color: '#a0aec0', fontSize: '0.85rem', marginTop: 4 }}>
-              🔗 {address} <span style={{ marginLeft: 8, color: '#00ff99', cursor: 'pointer' }} onClick={() => navigator.clipboard?.writeText(address)}>📋 Copy</span>
+              🔗 {address} <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(address)}
+                style={{ marginLeft: 8, color: '#00ff99', cursor: 'pointer', background: 'none', border: 'none', padding: 0, fontSize: 'inherit' }}
+                aria-label="Copy wallet address"
+              >📋 Copy</button>
             </div>
             <div style={{ marginTop: 6 }}>
               <span style={{ background: 'rgba(0,255,153,0.15)', color: '#00ff99', borderRadius: 6, padding: '2px 10px', fontSize: '0.75rem' }}>✅ Verified</span>
