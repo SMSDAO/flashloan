@@ -2,7 +2,6 @@
   "name": "flashloan-arbitrage-2026",
   "version": "2.0.0",
   "description": "Production-grade 2026 Solana Flashloan Arbitrage System",
-  "main": "index.js",
   "license": "MIT",
   "engines": {
     "node": ">=20.9.0"
