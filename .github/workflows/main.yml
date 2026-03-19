@@ -52,7 +52,7 @@ jobs:
         run: cd frontend && npm test
 
       - name: Compile Hardhat contracts
-        run: npx hardhat compile
+        run: node node_modules/hardhat/dist/src/cli.js compile
 
       - name: Upload frontend build artifacts
         uses: actions/upload-artifact@v4
