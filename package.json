@@ -2,10 +2,9 @@
   "name": "flashloan-arbitrage-2026",
   "version": "2.0.0",
   "description": "Production-grade 2026 Solana Flashloan Arbitrage System",
-  "main": "index.js",
   "license": "MIT",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=20.9.0"
   },
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
@@ -38,12 +37,13 @@
   ],
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",
-    "@solana/web3.js": "^1.95.0",
     "@solana/spl-token": "^0.4.0",
+    "@solana/web3.js": "^1.95.0",
     "npm-run-all": "^4.1.5"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
     "hardhat": "^3.0.4"
-  }
+  },
+  "type": "module"
 }

@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-test:
@@ -14,12 +15,20 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20.9'
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
             backend/package-lock.json
             frontend/package-lock.json
+
+      - name: Restore Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: frontend/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('frontend/pages/**', 'frontend/components/**', 'frontend/styles/**') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('frontend/package-lock.json') }}-
 
       - name: Install root dependencies
         run: npm install --legacy-peer-deps
@@ -43,8 +52,7 @@ jobs:
         run: cd frontend && npm test
 
       - name: Compile Hardhat contracts
-        run: npx hardhat compile
-        continue-on-error: true
+        run: node node_modules/hardhat/dist/src/cli.js compile
 
       - name: Upload frontend build artifacts
         uses: actions/upload-artifact@v4
