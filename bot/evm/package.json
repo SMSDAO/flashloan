@@ -1,0 +1,23 @@
+{
+  "name": "flashloan-evm-bot",
+  "version": "1.0.0",
+  "description": "EVM flashloan arbitrage bot with Flashbots MEV protection",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "lint": "eslint . --ext .js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

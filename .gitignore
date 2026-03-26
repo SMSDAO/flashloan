@@ -10,3 +10,14 @@ frontend/.next/
 # Node modules
 node_modules/
 */node_modules/
+**/node_modules/
+
+# Foundry build output
+out/
+cache/
+
+# Environment secrets
+.env
+
+# Foundry coverage
+lcov.info
