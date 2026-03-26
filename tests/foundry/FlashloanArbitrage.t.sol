@@ -130,6 +130,9 @@ contract MockAddressesProvider {
 // ─── Test Suite ────────────────────────────────────────────────────────────────
 
 contract FlashloanArbitrageTest is Test {
+    // Mirror event for vm.expectEmit matching (Solidity 0.8.19 compatible)
+    event MinProfitUpdated(uint256 oldMinProfit, uint256 newMinProfit);
+
     FlashloanArbitrage public arb;
     MockPool public pool;
     MockAddressesProvider public provider;
@@ -279,7 +282,7 @@ contract FlashloanArbitrageTest is Test {
 
     function test_SetMinProfitEmitsEvent() public {
         vm.expectEmit(false, false, false, true);
-        emit FlashloanArbitrage.MinProfitUpdated(0, 1000);
+        emit MinProfitUpdated(0, 1000);
         arb.setMinProfit(1000);
     }
 
