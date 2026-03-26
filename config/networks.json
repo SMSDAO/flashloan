@@ -1,0 +1,29 @@
+{
+  "networks": {
+    "mainnet": {
+      "chainId": 1,
+      "name": "Ethereum Mainnet",
+      "rpcEnvVar": "EVM_RPC_URL",
+      "aaveAddressesProvider": "0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e",
+      "flashloanFeesBps": 5,
+      "dexes": {
+        "uniswapV2": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+        "sushiswap": "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"
+      },
+      "flashbots": {
+        "relayUrl": "https://relay.flashbots.net"
+      }
+    },
+    "sepolia": {
+      "chainId": 11155111,
+      "name": "Sepolia Testnet",
+      "rpcEnvVar": "SEPOLIA_RPC_URL",
+      "aaveAddressesProvider": "0x012bAC54348C0E635dCAc9D5FB99f06F24136C9A",
+      "flashloanFeesBps": 5,
+      "dexes": {
+        "uniswapV2": "0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008"
+      },
+      "flashbots": null
+    }
+  }
+}

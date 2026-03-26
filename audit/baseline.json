@@ -1,0 +1,87 @@
+{
+  "generated": "2026-03-26T18:58:00Z",
+  "description": "Baseline snapshot for SMSDAO/flashloan EVM upgrade",
+  "contracts": [
+    {
+      "name": "FlashloanArbitrage",
+      "path": "contracts/FlashloanArbitrage.sol",
+      "solidity": "^0.8.19",
+      "inherits": ["IFlashLoanSimpleReceiver", "ReentrancyGuard", "Pausable", "Ownable"],
+      "externalFunctions": [
+        "executeFlashloan(address,uint256,address,address,address,uint256)",
+        "executeOperation(address,uint256,uint256,address,bytes)",
+        "simulateProfit(address,uint256,address,address,address)",
+        "pause()",
+        "unpause()",
+        "setMinProfit(uint256)",
+        "emergencyWithdraw(address,address)"
+      ],
+      "events": [
+        "FlashloanExecuted(address,uint256,uint256,uint256)",
+        "ArbitrageCompleted(address,address,address,uint256,uint256)",
+        "EmergencyWithdraw(address,uint256,address)",
+        "MinProfitUpdated(uint256,uint256)"
+      ],
+      "securityFeatures": [
+        "ReentrancyGuard on executeFlashloan and executeOperation",
+        "Pausable circuit breaker",
+        "Ownable access control",
+        "SafeERC20 for all token transfers",
+        "Caller validation in executeOperation (msg.sender == POOL)",
+        "Initiator validation (initiator == address(this))",
+        "Profitability invariant: finalBalance >= initialBalance + premium",
+        "safeApprove(0) before safeApprove(amount) to reset allowance"
+      ],
+      "dependencies": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/security/Pausable.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
+      ]
+    },
+    {
+      "name": "IArbitrage",
+      "path": "contracts/interfaces/IArbitrage.sol",
+      "solidity": "^0.8.19",
+      "type": "interface"
+    }
+  ],
+  "bot": {
+    "language": "Node.js",
+    "runtime": ">=20.9.0",
+    "path": "bot/evm/",
+    "framework": "ethers.js v6",
+    "features": [
+      "Multi-DEX opportunity scanner",
+      "On-chain + off-chain simulation engine",
+      "Transaction executor with retry logic and gas capping",
+      "Flashbots MEV protection bundle submission",
+      "Configurable token pairs"
+    ],
+    "mevProtection": "Flashbots bundles via @flashbots/ethers-provider-bundle"
+  },
+  "testing": {
+    "framework": "Foundry",
+    "testPath": "tests/foundry/",
+    "testFiles": [
+      "tests/foundry/FlashloanArbitrage.t.sol",
+      "tests/foundry/FlashloanArbitrage.fork.t.sol"
+    ],
+    "types": ["unit", "fuzz", "invariant", "fork"]
+  },
+  "ci": {
+    "platform": "GitHub Actions",
+    "file": ".github/workflows/main.yml",
+    "jobs": [
+      "build-test (Node.js: backend + frontend + Hardhat)",
+      "foundry-test (Foundry: unit + fuzz + invariant)",
+      "slither-security (Slither static analysis)"
+    ]
+  },
+  "knownIssues": [
+    "Fork tests require MAINNET_RPC_URL secret — auto-skipped in CI without it",
+    "Bot simulation mode when ARBITRAGE_CONTRACT_ADDRESS not set",
+    "Slither may report informational issues on OpenZeppelin standard patterns"
+  ]
+}
